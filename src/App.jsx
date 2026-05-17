@@ -483,8 +483,10 @@ export default function App() {
       <div className="rounded-3xl bg-white p-5 shadow">
         <h2 className="mb-4 text-xl font-bold">{title}</h2>
         <div className="w-full overflow-x-auto rounded-2xl border">
-          <table className="min-w-max md:w-full md:min-w-[1100px] table-auto md:table-fixed text-left text-sm">
-            <thead>
+          <table
+            className="w-full text-left text-sm"
+            style={{ minWidth: Math.max(560, 112 + data.workers.length * 140) + "px" }}
+          >            <thead>
               <tr className="border-b bg-slate-50 text-slate-500">
                 <th className="sticky left-0 z-10 bg-slate-50 px-3 py-3">日付</th>
                 {data.workers.map(function (worker) {
@@ -732,7 +734,7 @@ export default function App() {
                 <table className="w-full min-w-[960px] text-left text-sm">
                   <thead>
                     <tr className="border-b text-slate-500">
-                      <th className="sticky left-0 z-20 w-28 min-w-28 md:w-36 md:min-w-36 bg-slate-50 px-3 py-3 whitespace-nowrap">
+                      <th className="sticky left-0 z-20 w-28 bg-slate-50 px-3 py-3 whitespace-nowrap">
                         日付
                       </th>
                       <th className="py-3">出勤</th>
