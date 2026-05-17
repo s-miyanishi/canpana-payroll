@@ -491,7 +491,7 @@ export default function App() {
                   return (
                     <th
                       key={worker.id}
-                      className="w-24 min-w-24 px-3 py-3 text-center"
+                      className="w-16 min-w-16 md:w-24 md:min-w-24 px-2 md:px-3 py-3 text-center"
                     >
                       {worker.name}
                     </th>
@@ -516,7 +516,7 @@ export default function App() {
                       return (
                         <td key={worker.id} className="px-2 py-2 text-center">
                           <select
-                            className="w-16 rounded-xl border bg-white px-2 py-2 text-center font-bold"
+                            className="w-12 md:w-16 rounded-xl border bg-white px-1 md:px-2 py-2 text-center font-bold text-sm md:text-base"
                             value={getShiftValue(type, day.date, worker.id)}
                             onChange={function (e) {
                               updateShift(type, day.date, worker.id, e.target.value);
