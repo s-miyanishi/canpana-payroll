@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from "react";
+ import React, { useEffect, useMemo, useState } from "react";
 
 const STORAGE_KEY = "canpana-payroll-v2";
 
@@ -91,29 +91,21 @@ async function loadRemoteData() {
 
 async function saveRemoteData(data) {
   if (!USE_REMOTE_STORAGE) return;
-  const url = SUPABASE_URL + "/rest/v1/app_data?id=eq.canpana";
+
+  const url = SUPABASE_URL + "/rest/v1/app_data";
   const response = await fetch(url, {
-    method: "PATCH",
+    method: "POST",
     headers: {
       apikey: SUPABASE_ANON_KEY,
       Authorization: "Bearer " + SUPABASE_ANON_KEY,
       "Content-Type": "application/json",
-      Prefer: "return=minimal",
+      Prefer: "resolution=merge-duplicates,return=minimal",
     },
-    body: JSON.stringify({ data: data }),
+    body: JSON.stringify({ id: "canpana", data: data }),
   });
 
-  if (response.status === 404 || response.status === 406) {
-    await fetch(SUPABASE_URL + "/rest/v1/app_data", {
-      method: "POST",
-      headers: {
-        apikey: SUPABASE_ANON_KEY,
-        Authorization: "Bearer " + SUPABASE_ANON_KEY,
-        "Content-Type": "application/json",
-        Prefer: "return=minimal",
-      },
-      body: JSON.stringify({ id: "canpana", data: data }),
-    });
+  if (!response.ok) {
+    throw new Error("remote save failed");
   }
 }
 
@@ -139,6 +131,7 @@ export default function App() {
   const [edit, setEdit] = useState({ date: "", clockIn: "", clockOutDate: "", clockOut: "", transportation: 0 });
   const [editError, setEditError] = useState("");
   const [syncStatus, setSyncStatus] = useState(USE_REMOTE_STORAGE ? "共有保存モード" : "端末内保存モード");
+  const [remoteLoaded, setRemoteLoaded] = useState(!USE_REMOTE_STORAGE);
 
   useEffect(function () {
     if (!USE_REMOTE_STORAGE) return;
@@ -148,11 +141,15 @@ export default function App() {
       .then(function (remoteData) {
         if (!cancelled && remoteData) {
           setData(remoteData);
+          setRemoteLoaded(true);
           setSyncStatus("共有データ読み込み済み");
         }
       })
       .catch(function () {
-        if (!cancelled) setSyncStatus("共有データの読み込みに失敗しました");
+        if (!cancelled) {
+          setRemoteLoaded(true);
+          setSyncStatus("共有データの読み込みに失敗しました");
+        }
       });
     return function () {
       cancelled = true;
@@ -162,6 +159,7 @@ export default function App() {
   useEffect(function () {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
     if (!USE_REMOTE_STORAGE) return;
+    if (!remoteLoaded) return;
     setSyncStatus("保存中...");
     saveRemoteData(data)
       .then(function () {
@@ -170,7 +168,7 @@ export default function App() {
       .catch(function () {
         setSyncStatus("共有保存に失敗しました");
       });
-  }, [data]);
+  }, [data, remoteLoaded]);
 
   const selectedWorker = data.workers.find(function (w) {
     return w.id === selectedId;
