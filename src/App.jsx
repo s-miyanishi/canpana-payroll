@@ -491,7 +491,7 @@ export default function App() {
                   return (
                     <th
                       key={worker.id}
-                      className="w-16 min-w-16 md:w-24 md:min-w-24 px-2 md:px-3 py-3 text-center"
+                      className="w-24 min-w-24 md:w-36 md:min-w-36 px-2 md:px-4 py-3 text-center whitespace-nowrap"
                     >
                       {worker.name}
                     </th>
@@ -507,7 +507,7 @@ export default function App() {
 
                 return (
                   <tr key={day.date} className="border-b">
-                    <td className={"sticky left-0 z-10 w-28 min-w-28 bg-white px-3 py-2 font-bold " + (isHoliday ? "text-red-500" : isSaturday ? "text-sky-500" : "text-slate-800")}>
+                    <td className={"sticky left-0 z-10 w-28 min-w-28 md:w-36 md:min-w-36 bg-white px-3 py-2 font-bold whitespace-nowrap " + (isHoliday ? "text-red-500" : isSaturday ? "text-sky-500" : "text-slate-800")}>
                       <div>{day.label}</div>
                       {holidayName && <div className="text-xs font-bold text-red-500">{holidayName}</div>}
                     </td>
@@ -516,7 +516,7 @@ export default function App() {
                       return (
                         <td key={worker.id} className="px-2 py-2 text-center">
                           <select
-                            className="w-12 md:w-16 rounded-xl border bg-white px-1 md:px-2 py-2 text-center font-bold text-sm md:text-base"
+                            className="w-20 md:w-28 rounded-xl border bg-white px-2 md:px-3 py-2 text-center font-bold text-base"
                             value={getShiftValue(type, day.date, worker.id)}
                             onChange={function (e) {
                               updateShift(type, day.date, worker.id, e.target.value);
@@ -733,7 +733,7 @@ export default function App() {
                 <table className="w-full min-w-[960px] text-left text-sm">
                   <thead>
                     <tr className="border-b text-slate-500">
-                      <th className="sticky left-0 z-20 w-28 min-w-28 bg-slate-50 px-3 py-3">
+                      <th className="sticky left-0 z-20 w-28 min-w-28 md:w-36 md:min-w-36 bg-slate-50 px-3 py-3 whitespace-nowrap">
                         日付
                       </th>
                       <th className="py-3">出勤</th>
