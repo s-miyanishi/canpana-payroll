@@ -483,7 +483,7 @@ export default function App() {
       <div className="rounded-3xl bg-white p-5 shadow">
         <h2 className="mb-4 text-xl font-bold">{title}</h2>
         <div className="w-full overflow-x-auto rounded-2xl border">
-          <table className="min-w-max table-fixed text-left text-sm">
+          <table className="w-full min-w-[620px] md:min-w-[1100px] table-fixed text-left text-sm">
             <thead>
               <tr className="border-b bg-slate-50 text-slate-500">
                 <th className="sticky left-0 z-10 bg-slate-50 px-3 py-3">日付</th>
@@ -516,8 +516,7 @@ export default function App() {
                       return (
                         <td key={worker.id} className="px-2 py-2 text-center">
                           <select
-                            className="w-20 md:w-28 rounded-xl border bg-white px-2 md:px-3 py-2 text-center font-bold text-base"
-                            value={getShiftValue(type, day.date, worker.id)}
+                            className="w-20 md:w-32 rounded-xl border bg-white px-2 md:px-3 py-2 text-center font-bold text-base" value={getShiftValue(type, day.date, worker.id)}
                             onChange={function (e) {
                               updateShift(type, day.date, worker.id, e.target.value);
                             }}
