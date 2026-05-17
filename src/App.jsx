@@ -483,13 +483,10 @@ export default function App() {
       <div className="rounded-3xl bg-white p-5 shadow">
         <h2 className="mb-4 text-xl font-bold">{title}</h2>
         <div className="w-full overflow-x-auto rounded-2xl border">
-          <table
-            className="w-full text-left text-sm"
-            style={{ minWidth: Math.max(560, 112 + data.workers.length * 140) + "px" }}
-          >            <thead>
+          <table className="min-w-max md:w-full md:min-w-[1100px] table-auto md:table-fixed text-left text-sm">
+            <thead>
               <tr className="border-b bg-slate-50 text-slate-500">
-                <th className="sticky left-0 z-10 bg-slate-50 px-3 py-3">日付</th>
-                {data.workers.map(function (worker) {
+                <th className="sticky left-0 z-20 w-24 min-w-24 md:w-36 md:min-w-36 bg-slate-50 px-2 md:px-3 py-3 whitespace-nowrap">日付</th>                {data.workers.map(function (worker) {
                   return (
                     <th
                       key={worker.id}
@@ -509,9 +506,8 @@ export default function App() {
 
                 return (
                   <tr key={day.date} className="border-b">
-                    <td className={"sticky left-0 z-10 w-28 min-w-28 md:w-36 md:min-w-36 bg-white px-3 py-2 font-bold whitespace-nowrap " + (isHoliday ? "text-red-500" : isSaturday ? "text-sky-500" : "text-slate-800")}>
+                    <td className={"sticky left-0 z-10 w-24 min-w-24 md:w-36 md:min-w-36 bg-white px-2 md:px-3 py-2 font-bold whitespace-nowrap " + (isHoliday ? "text-red-500" : isSaturday ? "text-sky-500" : "text-slate-800")}>
                       <div>{day.label}</div>
-                      {holidayName && <div className="text-xs font-bold text-red-500">{holidayName}</div>}
                     </td>
 
                     {data.workers.map(function (worker) {
