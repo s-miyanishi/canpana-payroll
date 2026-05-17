@@ -14,6 +14,7 @@ const yen = new Intl.NumberFormat("ja-JP", {
 });
 
 const SHIFT_OPTIONS = ["", "○", "×", "△", "休"];
+const HOLIDAY_API_URL = "https://holidays-jp.github.io/api/v1/date.json";
 
 function normalizeData(value) {
   return {
@@ -159,6 +160,7 @@ export default function App() {
   const [editError, setEditError] = useState("");
   const [syncStatus, setSyncStatus] = useState(USE_REMOTE_STORAGE ? "共有保存モード" : "端末内保存モード");
   const [remoteLoaded, setRemoteLoaded] = useState(!USE_REMOTE_STORAGE);
+  const [holidays, setHolidays] = useState({});
 
   useEffect(function () {
     if (!USE_REMOTE_STORAGE) return;
@@ -197,6 +199,20 @@ export default function App() {
         setSyncStatus("共有保存に失敗しました");
       });
   }, [data, remoteLoaded]);
+
+  useEffect(function () {
+  fetch(HOLIDAY_API_URL)
+    .then(function (response) {
+      if (!response.ok) return {};
+      return response.json();
+    })
+    .then(function (holidayData) {
+      setHolidays(holidayData || {});
+    })
+    .catch(function () {
+      setHolidays({});
+    });
+}, []);
 
   const selectedWorker = data.workers.find(function (w) {
     return w.id === selectedId;
@@ -482,12 +498,15 @@ export default function App() {
             </thead>
             <tbody>
               {shiftDays.map(function (day) {
-                const isHoliday = day.weekday === "日";
+                const holidayName = holidays[day.date] || "";
+                const isHoliday = day.weekday === "日" || Boolean(holidayName);
                 const isSaturday = day.weekday === "土";
                 return (
                   <tr key={day.date} className="border-b">
-                    <td className={("sticky left-0 z-10 bg-white px-3 py-2 font-bold " + (isHoliday ? "text-red-500" : isSaturday ? "text-sky-500" : "text-slate-800"))}>{day.label}</td>
-                    {data.workers.map(function (worker) {
+                    <td className={"sticky left-0 z-10 bg-white px-3 py-2 font-bold " + (isHoliday ? "text-red-500" : isSaturday ? "text-sky-500" : "text-slate-800")}>
+                      <div>{day.label}</div>
+                       {holidayName && <div className="text-xs font-bold text-red-500">{holidayName}</div>}
+                    </td>
                       return (
                         <td key={worker.id} className="px-2 py-2 text-center">
                           <select
@@ -507,7 +526,6 @@ export default function App() {
                           </select>
                         </td>
                       );
-                    })}
                   </tr>
                 );
               })}
