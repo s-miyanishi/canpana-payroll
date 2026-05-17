@@ -482,14 +482,17 @@ export default function App() {
     return (
       <div className="rounded-3xl bg-white p-5 shadow">
         <h2 className="mb-4 text-xl font-bold">{title}</h2>
-        <div className="overflow-x-auto">
-          <table className="w-full min-w-[760px] text-left text-sm">
+        <div className="w-full overflow-x-auto rounded-2xl border">
+          <table className="min-w-max table-fixed text-left text-sm">
             <thead>
               <tr className="border-b bg-slate-50 text-slate-500">
                 <th className="sticky left-0 z-10 bg-slate-50 px-3 py-3">日付</th>
                 {data.workers.map(function (worker) {
                   return (
-                    <th key={worker.id} className="px-3 py-3 text-center">
+                    <th
+                      key={worker.id}
+                      className="w-24 min-w-24 px-3 py-3 text-center"
+                    >
                       {worker.name}
                     </th>
                   );
@@ -504,7 +507,7 @@ export default function App() {
 
                 return (
                   <tr key={day.date} className="border-b">
-                    <td className={"sticky left-0 z-10 bg-white px-3 py-2 font-bold " + (isHoliday ? "text-red-500" : isSaturday ? "text-sky-500" : "text-slate-800")}>
+                    <td className={"sticky left-0 z-10 w-28 min-w-28 bg-white px-3 py-2 font-bold " + (isHoliday ? "text-red-500" : isSaturday ? "text-sky-500" : "text-slate-800")}>
                       <div>{day.label}</div>
                       {holidayName && <div className="text-xs font-bold text-red-500">{holidayName}</div>}
                     </td>
@@ -513,7 +516,7 @@ export default function App() {
                       return (
                         <td key={worker.id} className="px-2 py-2 text-center">
                           <select
-                            className="w-20 rounded-xl border bg-white px-2 py-2 text-center font-bold"
+                            className="w-16 rounded-xl border bg-white px-2 py-2 text-center font-bold"
                             value={getShiftValue(type, day.date, worker.id)}
                             onChange={function (e) {
                               updateShift(type, day.date, worker.id, e.target.value);
@@ -730,7 +733,9 @@ export default function App() {
                 <table className="w-full min-w-[960px] text-left text-sm">
                   <thead>
                     <tr className="border-b text-slate-500">
-                      <th className="py-3">日付</th>
+                      <th className="sticky left-0 z-20 w-28 min-w-28 bg-slate-50 px-3 py-3">
+                        日付
+                      </th>
                       <th className="py-3">出勤</th>
                       <th className="py-3">退勤日</th>
                       <th className="py-3">退勤</th>
