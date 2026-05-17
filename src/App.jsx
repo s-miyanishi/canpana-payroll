@@ -482,58 +482,57 @@ export default function App() {
     return (
       <div className="rounded-3xl bg-white p-5 shadow">
         <h2 className="mb-4 text-xl font-bold">{title}</h2>
-        <div className="w-full overflow-x-auto rounded-2xl border">
-          <table className="min-w-max lg:w-full lg:min-w-[1100px] table-auto lg:table-fixed text-left text-sm">            <thead>
-            <tr className="border-b bg-slate-50 text-slate-500">
-              <th className="sticky left-0 z-20 w-24 min-w-24 md:w-36 md:min-w-36 bg-slate-50 px-2 md:px-3 py-3 whitespace-nowrap">日付</th>                {data.workers.map(function (worker) {
-                return (
-                  <th
-                    key={worker.id}
-                    className="w-24 min-w-24 md:w-36 md:min-w-36 px-2 md:px-4 py-3 text-center whitespace-nowrap"
-                  >
-                    {worker.name}
-                  </th>
-                );
-              })}
-            </tr>
-          </thead>
-            <tbody>
-              {shiftDays.map(function (day) {
-                const holidayName = holidays[day.date] || "";
-                const isHoliday = day.weekday === "日" || Boolean(holidayName);
-                const isSaturday = day.weekday === "土";
+        <div className="inline-block max-w-full overflow-x-auto rounded-2xl border md:block md:w-full">          <table className="min-w-max lg:w-full lg:min-w-[1100px] table-auto lg:table-fixed text-left text-sm">            <thead>
+          <tr className="border-b bg-slate-50 text-slate-500">
+            <th className="sticky left-0 z-20 w-24 min-w-24 md:w-36 md:min-w-36 bg-slate-50 px-2 md:px-3 py-3 whitespace-nowrap">日付</th>                {data.workers.map(function (worker) {
+              return (
+                <th
+                  key={worker.id}
+                  className="w-24 min-w-24 md:w-36 md:min-w-36 px-2 md:px-4 py-3 text-center whitespace-nowrap"
+                >
+                  {worker.name}
+                </th>
+              );
+            })}
+          </tr>
+        </thead>
+          <tbody>
+            {shiftDays.map(function (day) {
+              const holidayName = holidays[day.date] || "";
+              const isHoliday = day.weekday === "日" || Boolean(holidayName);
+              const isSaturday = day.weekday === "土";
 
-                return (
-                  <tr key={day.date} className="border-b">
-                    <td className={"sticky left-0 z-10 w-24 min-w-24 md:w-36 md:min-w-36 bg-white px-2 md:px-3 py-2 font-bold whitespace-nowrap " + (isHoliday ? "text-red-500" : isSaturday ? "text-sky-500" : "text-slate-800")}>
-                      <div>{day.label}</div>
-                    </td>
+              return (
+                <tr key={day.date} className="border-b">
+                  <td className={"sticky left-0 z-10 w-24 min-w-24 md:w-36 md:min-w-36 bg-white px-2 md:px-3 py-2 font-bold whitespace-nowrap " + (isHoliday ? "text-red-500" : isSaturday ? "text-sky-500" : "text-slate-800")}>
+                    <div>{day.label}</div>
+                  </td>
 
-                    {data.workers.map(function (worker) {
-                      return (
-                        <td key={worker.id} className="px-2 py-2 text-center">
-                          <select
-                            className="w-20 md:w-32 rounded-xl border bg-white px-2 md:px-3 py-2 text-center font-bold text-base" value={getShiftValue(type, day.date, worker.id)}
-                            onChange={function (e) {
-                              updateShift(type, day.date, worker.id, e.target.value);
-                            }}
-                          >
-                            {SHIFT_OPTIONS.map(function (option) {
-                              return (
-                                <option key={option || "blank"} value={option}>
-                                  {option || "-"}
-                                </option>
-                              );
-                            })}
-                          </select>
-                        </td>
-                      );
-                    })}
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
+                  {data.workers.map(function (worker) {
+                    return (
+                      <td key={worker.id} className="px-2 py-2 text-center">
+                        <select
+                          className="w-20 md:w-32 rounded-xl border bg-white px-2 md:px-3 py-2 text-center font-bold text-base" value={getShiftValue(type, day.date, worker.id)}
+                          onChange={function (e) {
+                            updateShift(type, day.date, worker.id, e.target.value);
+                          }}
+                        >
+                          {SHIFT_OPTIONS.map(function (option) {
+                            return (
+                              <option key={option || "blank"} value={option}>
+                                {option || "-"}
+                              </option>
+                            );
+                          })}
+                        </select>
+                      </td>
+                    );
+                  })}
+                </tr>
+              );
+            })}
+          </tbody>
+        </table>
         </div>
       </div>
     );
