@@ -483,21 +483,20 @@ export default function App() {
       <div className="rounded-3xl bg-white p-5 shadow">
         <h2 className="mb-4 text-xl font-bold">{title}</h2>
         <div className="w-full overflow-x-auto rounded-2xl border">
-          <table className="min-w-max md:w-full md:min-w-[1100px] table-auto md:table-fixed text-left text-sm">
-            <thead>
-              <tr className="border-b bg-slate-50 text-slate-500">
-                <th className="sticky left-0 z-20 w-24 min-w-24 md:w-36 md:min-w-36 bg-slate-50 px-2 md:px-3 py-3 whitespace-nowrap">日付</th>                {data.workers.map(function (worker) {
-                  return (
-                    <th
-                      key={worker.id}
-                      className="w-24 min-w-24 md:w-36 md:min-w-36 px-2 md:px-4 py-3 text-center whitespace-nowrap"
-                    >
-                      {worker.name}
-                    </th>
-                  );
-                })}
-              </tr>
-            </thead>
+          <table className="min-w-max lg:w-full lg:min-w-[1100px] table-auto lg:table-fixed text-left text-sm">            <thead>
+            <tr className="border-b bg-slate-50 text-slate-500">
+              <th className="sticky left-0 z-20 w-24 min-w-24 md:w-36 md:min-w-36 bg-slate-50 px-2 md:px-3 py-3 whitespace-nowrap">日付</th>                {data.workers.map(function (worker) {
+                return (
+                  <th
+                    key={worker.id}
+                    className="w-24 min-w-24 md:w-36 md:min-w-36 px-2 md:px-4 py-3 text-center whitespace-nowrap"
+                  >
+                    {worker.name}
+                  </th>
+                );
+              })}
+            </tr>
+          </thead>
             <tbody>
               {shiftDays.map(function (day) {
                 const holidayName = holidays[day.date] || "";
