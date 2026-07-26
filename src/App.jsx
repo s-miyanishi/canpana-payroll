@@ -21,6 +21,10 @@ function normalizeData(value) {
     workers: Array.isArray(value?.workers) ? value.workers : [],
     records: Array.isArray(value?.records) ? value.records : [],
     shifts: value?.shifts && typeof value.shifts === "object" ? value.shifts : {},
+    salaryReceipts:
+      value?.salaryReceipts && typeof value.salaryReceipts === "object"
+        ? value.salaryReceipts
+        : {},
   };
 }
 
@@ -116,7 +120,7 @@ async function loadRemoteData() {
   });
   if (!response.ok) throw new Error("remote load failed");
   const rows = await response.json();
-  if (!rows || rows.length === 0) return { workers: [], records: [], shifts: {} };
+  if (!rows || rows.length === 0) return { workers: [], records: [], shifts: {}, salaryReceipts: {} };
   return normalizeData(rows[0].data);
 }
 
@@ -140,9 +144,9 @@ export default function App() {
   const [data, setData] = useState(function () {
     try {
       const saved = localStorage.getItem(STORAGE_KEY);
-      return saved ? normalizeData(JSON.parse(saved)) : { workers: [], records: [], shifts: {} };
+      return saved ? normalizeData(JSON.parse(saved)) : { workers: [], records: [], shifts: {}, salaryReceipts: {} };
     } catch (e) {
-      return { workers: [], records: [], shifts: {} };
+      return { workers: [], records: [], shifts: {}, salaryReceipts: {} };
     }
   });
 
@@ -448,6 +452,38 @@ export default function App() {
     });
   }
 
+  function getSalaryReceipt(monthKey) {
+    return (
+      data.salaryReceipts?.[selectedId]?.[monthKey] || {
+        received: false,
+        receivedAt: "",
+      }
+    );
+  }
+
+  function updateSalaryReceipt(monthKey, checked) {
+    if (!selectedId) return;
+
+    setData(function (prev) {
+      const normalized = normalizeData(prev);
+      const workerReceipts = normalized.salaryReceipts[selectedId] || {};
+
+      return {
+        ...normalized,
+        salaryReceipts: {
+          ...normalized.salaryReceipts,
+          [selectedId]: {
+            ...workerReceipts,
+            [monthKey]: {
+              received: checked,
+              receivedAt: checked ? today() : "",
+            },
+          },
+        },
+      };
+    });
+  }
+
   function getShiftValue(type, date, workerId) {
     return data.shifts?.[shiftMonth]?.[type]?.[date]?.[workerId] || "";
   }
@@ -695,6 +731,7 @@ export default function App() {
                       <th className="py-3">勤務時間</th>
                       <th className="py-3">深夜時間</th>
                       <th className="py-3 text-right">給与</th>
+                      <th className="py-3 text-center">受取確認</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -706,6 +743,41 @@ export default function App() {
                           <td className="py-3">{minText(m.total)}</td>
                           <td className="py-3">{minText(m.night)}</td>
                           <td className="py-3 text-right font-bold">{yen.format(m.pay)}</td>
+                          <td className="py-3 text-center">
+                            {(() => {
+                              const receipt = getSalaryReceipt(m.key);
+
+                              return (
+                                <label className="inline-flex cursor-pointer flex-col items-center gap-1">
+                                  <span className="inline-flex items-center gap-2">
+                                    <input
+                                      type="checkbox"
+                                      className="h-5 w-5 accent-emerald-600"
+                                      checked={receipt.received}
+                                      onChange={function (e) {
+                                        updateSalaryReceipt(m.key, e.target.checked);
+                                      }}
+                                    />
+                                    <span
+                                      className={
+                                        receipt.received
+                                          ? "font-bold text-emerald-700"
+                                          : "text-slate-500"
+                                      }
+                                    >
+                                      {receipt.received ? "受取済み" : "未受取"}
+                                    </span>
+                                  </span>
+
+                                  {receipt.receivedAt && (
+                                    <span className="text-xs text-slate-500">
+                                      受取日：{receipt.receivedAt}
+                                    </span>
+                                  )}
+                                </label>
+                              );
+                            })()}
+                          </td>
                         </tr>
                       );
                     })}
@@ -715,6 +787,7 @@ export default function App() {
                       <td className="py-4">{minText(annualTime)}</td>
                       <td className="py-4">-</td>
                       <td className="py-4 text-right text-lg">{yen.format(annualPay)}</td>
+                      <td className="py-4 text-center">-</td>
                     </tr>
                   </tbody>
                 </table>
@@ -738,6 +811,7 @@ export default function App() {
                       <th className="py-3">勤務時間</th>
                       <th className="py-3">深夜</th>
                       <th className="py-3 text-right">給与</th>
+                      <th className="py-3 text-center">受取確認</th>
                       <th className="py-3 text-right">操作</th>
                     </tr>
                   </thead>
