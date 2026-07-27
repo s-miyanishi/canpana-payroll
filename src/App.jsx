@@ -157,7 +157,6 @@ export default function App() {
   const [transportation, setTransportation] = useState("");
   const [fiscalYear, setFiscalYear] = useState(getCurrentFiscalYear());
   const [shiftMonth, setShiftMonth] = useState(getCurrentMonthKey());
-  const [historyMonth, setHistoryMonth] = useState(getCurrentMonthKey());
   const [editingWorkerId, setEditingWorkerId] = useState("");
   const [workerEdit, setWorkerEdit] = useState({ name: "", hourlyWage: "", transportation: "" });
   const [editingRecordId, setEditingRecordId] = useState("");
@@ -237,11 +236,28 @@ export default function App() {
       });
   }, [data.records, selectedId]);
 
-  const historyRecords = useMemo(function () {
-    return records.filter(function (r) {
-      return r.date.slice(0, 7) === historyMonth;
+  const recordsByMonth = useMemo(function () {
+    const grouped = {};
+
+    records.forEach(function (record) {
+      const monthKey = record.date.slice(0, 7);
+      if (!grouped[monthKey]) {
+        grouped[monthKey] = [];
+      }
+      grouped[monthKey].push(record);
     });
-  }, [records, historyMonth]);
+
+    return Object.keys(grouped)
+      .sort(function (a, b) {
+        return b.localeCompare(a);
+      })
+      .map(function (monthKey) {
+        return {
+          monthKey: monthKey,
+          records: grouped[monthKey],
+        };
+      });
+  }, [records]);
 
   const months = useMemo(function () {
     const list = [];
@@ -849,76 +865,196 @@ export default function App() {
               </div>
             </div>
 
-            <div className="rounded-3xl bg-white p-5 shadow">
-              <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-                <div>
-                  <h2 className="text-xl font-bold">勤務履歴・修正</h2>
-                  <p className="mt-1 text-sm text-slate-500">表示する月を選択してください。</p>
+            <div className="space-y-4">
+              <h2 className="text-xl font-bold">勤務履歴・修正</h2>
+
+              {editError && (
+                <div className="rounded-2xl bg-red-50 p-3 text-sm font-bold text-red-700">
+                  {editError}
                 </div>
-                <input
-                  className="rounded-2xl border px-4 py-2"
-                  type="month"
-                  value={historyMonth}
-                  onChange={function (e) {
-                    setHistoryMonth(e.target.value);
-                    setEditingRecordId("");
-                    setEditError("");
-                  }}
-                />
-              </div>
-              {editError && <div className="mb-4 rounded-2xl bg-red-50 p-3 text-sm font-bold text-red-700">{editError}</div>}
-              <div className="overflow-x-auto">
-                <table className="w-full min-w-[960px] text-left text-sm">
-                  <thead>
-                    <tr className="border-b text-slate-500">
-                      <th className="sticky left-0 z-20 w-28 bg-slate-50 px-3 py-3 whitespace-nowrap">
-                        日付
-                      </th>
-                      <th className="py-3">出勤</th>
-                      <th className="py-3">退勤日</th>
-                      <th className="py-3">退勤</th>
-                      <th className="py-3">交通費</th>
-                      <th className="py-3">勤務時間</th>
-                      <th className="py-3">深夜</th>
-                      <th className="py-3 text-right">給与</th>
-                      <th className="py-3 text-center">受取確認</th>
-                      <th className="py-3 text-right">操作</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {historyRecords.length === 0 && <tr><td colSpan="9" className="py-8 text-center text-slate-500">この月の勤務履歴はありません。</td></tr>}
-                    {historyRecords.map(function (r) {
-                      const result = calcPay(r, selectedWorker.hourlyWage);
-                      const isEdit = editingRecordId === r.id;
-                      return (
-                        <tr key={r.id} className="border-b">
-                          <td className="py-3">{isEdit ? <input className="rounded border px-2 py-1" type="date" value={edit.date} onChange={function (e) { setEdit({ ...edit, date: e.target.value }); }} /> : r.date}</td>
-                          <td className="py-3">{isEdit ? <input className="rounded border px-2 py-1" type="time" value={edit.clockIn} onChange={function (e) { setEdit({ ...edit, clockIn: e.target.value }); }} /> : r.clockIn}</td>
-                          <td className="py-3">{isEdit ? <input className="rounded border px-2 py-1" type="date" value={edit.clockOutDate} onChange={function (e) { setEdit({ ...edit, clockOutDate: e.target.value }); }} /> : (r.clockOut ? (r.clockOutDate || r.date) : "未退勤")}</td>
-                          <td className="py-3">{isEdit ? <input className="rounded border px-2 py-1" type="time" value={edit.clockOut} onChange={function (e) { setEdit({ ...edit, clockOut: e.target.value }); }} /> : (r.clockOut || "未退勤")}</td>
-                          <td className="py-3">{isEdit ? <input className="w-24 rounded border px-2 py-1" type="number" min="0" value={edit.transportation} onChange={function (e) { setEdit({ ...edit, transportation: e.target.value }); }} /> : yen.format(r.transportation || 0)}</td>
-                          <td className="py-3">{result.error ? "日時エラー" : minText(result.total)}</td>
-                          <td className="py-3">{result.error ? "-" : minText(result.night)}</td>
-                          <td className="py-3 text-right font-bold">{result.error ? "-" : yen.format(result.pay + Number(r.transportation || 0))}</td>
-                          <td className="py-3 text-right">
-                            {isEdit ? (
-                              <span className="space-x-2">
-                                <button onClick={function () { saveEdit(r.id); }} className="rounded bg-sky-700 px-3 py-2 font-bold text-white">保存</button>
-                                <button onClick={function () { setEditingRecordId(""); setEditError(""); }} className="rounded bg-slate-100 px-3 py-2 font-bold">取消</button>
-                              </span>
-                            ) : (
-                              <span className="space-x-2">
-                                <button onClick={function () { startEdit(r); }} className="rounded bg-slate-100 px-3 py-2 font-bold">修正</button>
-                                <button onClick={function () { deleteRecord(r.id); }} className="rounded bg-red-50 px-3 py-2 font-bold text-red-600">削除</button>
-                              </span>
-                            )}
-                          </td>
-                        </tr>
-                      );
-                    })}
-                  </tbody>
-                </table>
-              </div>
+              )}
+
+              {recordsByMonth.length === 0 && (
+                <div className="rounded-3xl bg-white p-8 text-center text-slate-500 shadow">
+                  勤務履歴がありません。
+                </div>
+              )}
+
+              {recordsByMonth.map(function (monthGroup) {
+                return (
+                  <div key={monthGroup.monthKey} className="rounded-3xl bg-white p-5 shadow">
+                    <h3 className="mb-4 text-lg font-black">
+                      {monthGroup.monthKey.replace("-", "年")}月
+                    </h3>
+
+                    <div className="overflow-x-auto">
+                      <table className="w-full min-w-[960px] text-left text-sm">
+                        <thead>
+                          <tr className="border-b text-slate-500">
+                            <th className="sticky left-0 z-20 w-28 whitespace-nowrap bg-slate-50 px-3 py-3">
+                              日付
+                            </th>
+                            <th className="py-3">出勤</th>
+                            <th className="py-3">退勤日</th>
+                            <th className="py-3">退勤</th>
+                            <th className="py-3">交通費</th>
+                            <th className="py-3">勤務時間</th>
+                            <th className="py-3">深夜</th>
+                            <th className="py-3 text-right">給与</th>
+                            <th className="py-3 text-right">操作</th>
+                          </tr>
+                        </thead>
+
+                        <tbody>
+                          {monthGroup.records.map(function (r) {
+                            const result = calcPay(r, selectedWorker.hourlyWage);
+                            const isEdit = editingRecordId === r.id;
+
+                            return (
+                              <tr key={r.id} className="border-b">
+                                <td className="py-3">
+                                  {isEdit ? (
+                                    <input
+                                      className="rounded border px-2 py-1"
+                                      type="date"
+                                      value={edit.date}
+                                      onChange={function (e) {
+                                        setEdit({ ...edit, date: e.target.value });
+                                      }}
+                                    />
+                                  ) : (
+                                    r.date
+                                  )}
+                                </td>
+
+                                <td className="py-3">
+                                  {isEdit ? (
+                                    <input
+                                      className="rounded border px-2 py-1"
+                                      type="time"
+                                      value={edit.clockIn}
+                                      onChange={function (e) {
+                                        setEdit({ ...edit, clockIn: e.target.value });
+                                      }}
+                                    />
+                                  ) : (
+                                    r.clockIn
+                                  )}
+                                </td>
+
+                                <td className="py-3">
+                                  {isEdit ? (
+                                    <input
+                                      className="rounded border px-2 py-1"
+                                      type="date"
+                                      value={edit.clockOutDate}
+                                      onChange={function (e) {
+                                        setEdit({ ...edit, clockOutDate: e.target.value });
+                                      }}
+                                    />
+                                  ) : r.clockOut ? (
+                                    r.clockOutDate || r.date
+                                  ) : (
+                                    "未退勤"
+                                  )}
+                                </td>
+
+                                <td className="py-3">
+                                  {isEdit ? (
+                                    <input
+                                      className="rounded border px-2 py-1"
+                                      type="time"
+                                      value={edit.clockOut}
+                                      onChange={function (e) {
+                                        setEdit({ ...edit, clockOut: e.target.value });
+                                      }}
+                                    />
+                                  ) : (
+                                    r.clockOut || "未退勤"
+                                  )}
+                                </td>
+
+                                <td className="py-3">
+                                  {isEdit ? (
+                                    <input
+                                      className="w-24 rounded border px-2 py-1"
+                                      type="number"
+                                      min="0"
+                                      value={edit.transportation}
+                                      onChange={function (e) {
+                                        setEdit({ ...edit, transportation: e.target.value });
+                                      }}
+                                    />
+                                  ) : (
+                                    yen.format(r.transportation || 0)
+                                  )}
+                                </td>
+
+                                <td className="py-3">
+                                  {result.error ? "日時エラー" : minText(result.total)}
+                                </td>
+
+                                <td className="py-3">
+                                  {result.error ? "-" : minText(result.night)}
+                                </td>
+
+                                <td className="py-3 text-right font-bold">
+                                  {result.error
+                                    ? "-"
+                                    : yen.format(result.pay + Number(r.transportation || 0))}
+                                </td>
+
+                                <td className="py-3 text-right">
+                                  {isEdit ? (
+                                    <span className="space-x-2">
+                                      <button
+                                        onClick={function () {
+                                          saveEdit(r.id);
+                                        }}
+                                        className="rounded bg-sky-700 px-3 py-2 font-bold text-white"
+                                      >
+                                        保存
+                                      </button>
+                                      <button
+                                        onClick={function () {
+                                          setEditingRecordId("");
+                                          setEditError("");
+                                        }}
+                                        className="rounded bg-slate-100 px-3 py-2 font-bold"
+                                      >
+                                        取消
+                                      </button>
+                                    </span>
+                                  ) : (
+                                    <span className="space-x-2">
+                                      <button
+                                        onClick={function () {
+                                          startEdit(r);
+                                        }}
+                                        className="rounded bg-slate-100 px-3 py-2 font-bold"
+                                      >
+                                        修正
+                                      </button>
+                                      <button
+                                        onClick={function () {
+                                          deleteRecord(r.id);
+                                        }}
+                                        className="rounded bg-red-50 px-3 py-2 font-bold text-red-600"
+                                      >
+                                        削除
+                                      </button>
+                                    </span>
+                                  )}
+                                </td>
+                              </tr>
+                            );
+                          })}
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
+                );
+              })}
             </div>
           </section>
         )}
