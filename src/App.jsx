@@ -912,10 +912,10 @@ export default function App() {
 
                             return (
                               <tr key={r.id} className="border-b">
-                                <td className="py-3">
+                                <td className="sticky left-0 z-10 w-28 whitespace-nowrap bg-white px-3 py-3">
                                   {isEdit ? (
                                     <input
-                                      className="rounded border px-2 py-1"
+                                      className="w-32 rounded border px-2 py-1"
                                       type="date"
                                       value={edit.date}
                                       onChange={function (e) {
