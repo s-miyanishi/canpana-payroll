@@ -238,8 +238,8 @@ export default function App() {
   }, [data.records, selectedId]);
 
   const historyRecords = useMemo(function () {
-    return records.filter(function (r) {
-      return r.date.slice(0, 7) === historyMonth;
+    return records.filter(function (record) {
+      return record.date.slice(0, 7) === historyMonth;
     });
   }, [records, historyMonth]);
 
