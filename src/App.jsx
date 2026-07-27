@@ -157,6 +157,7 @@ export default function App() {
   const [transportation, setTransportation] = useState("");
   const [fiscalYear, setFiscalYear] = useState(getCurrentFiscalYear());
   const [shiftMonth, setShiftMonth] = useState(getCurrentMonthKey());
+  const [historyMonth, setHistoryMonth] = useState(getCurrentMonthKey());
   const [editingWorkerId, setEditingWorkerId] = useState("");
   const [workerEdit, setWorkerEdit] = useState({ name: "", hourlyWage: "", transportation: "" });
   const [editingRecordId, setEditingRecordId] = useState("");
@@ -235,6 +236,12 @@ export default function App() {
         return (b.date + b.clockIn).localeCompare(a.date + a.clockIn);
       });
   }, [data.records, selectedId]);
+
+  const historyRecords = useMemo(function () {
+    return records.filter(function (r) {
+      return r.date.slice(0, 7) === historyMonth;
+    });
+  }, [records, historyMonth]);
 
   const months = useMemo(function () {
     const list = [];
@@ -843,7 +850,22 @@ export default function App() {
             </div>
 
             <div className="rounded-3xl bg-white p-5 shadow">
-              <h2 className="mb-4 text-xl font-bold">勤務履歴・修正</h2>
+              <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                <div>
+                  <h2 className="text-xl font-bold">勤務履歴・修正</h2>
+                  <p className="mt-1 text-sm text-slate-500">表示する月を選択してください。</p>
+                </div>
+                <input
+                  className="rounded-2xl border px-4 py-2"
+                  type="month"
+                  value={historyMonth}
+                  onChange={function (e) {
+                    setHistoryMonth(e.target.value);
+                    setEditingRecordId("");
+                    setEditError("");
+                  }}
+                />
+              </div>
               {editError && <div className="mb-4 rounded-2xl bg-red-50 p-3 text-sm font-bold text-red-700">{editError}</div>}
               <div className="overflow-x-auto">
                 <table className="w-full min-w-[960px] text-left text-sm">
@@ -864,8 +886,8 @@ export default function App() {
                     </tr>
                   </thead>
                   <tbody>
-                    {records.length === 0 && <tr><td colSpan="9" className="py-8 text-center text-slate-500">勤務履歴がありません。</td></tr>}
-                    {records.map(function (r) {
+                    {historyRecords.length === 0 && <tr><td colSpan="9" className="py-8 text-center text-slate-500">この月の勤務履歴はありません。</td></tr>}
+                    {historyRecords.map(function (r) {
                       const result = calcPay(r, selectedWorker.hourlyWage);
                       const isEdit = editingRecordId === r.id;
                       return (
