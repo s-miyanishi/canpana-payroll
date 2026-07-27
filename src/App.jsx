@@ -819,7 +819,7 @@ export default function App() {
 
                                   {receipt.receivedAt && (
                                     <span className="text-xs text-slate-500">
-                                      受取日：{receipt.receivedAt}
+                                      確認日：{receipt.receivedAt}
                                     </span>
                                   )}
                                 </label>
